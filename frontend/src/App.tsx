@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import type { Session } from '@supabase/supabase-js'
 import { supabase } from './lib/supabase'
 import { useKnowledgeBase } from './hooks/useKnowledgeBase'
 import { useChat } from './hooks/useChat'
@@ -9,14 +10,15 @@ import Sidebar from './components/Sidebar'
 import KBCreator from './components/KBCreator'
 import DocumentUploader from './components/DocumentUploader'
 import ChatWindow from './components/ChatWindow'
+import type { KnowledgeBase } from './types'
 
 export default function App() {
-  const [session, setSession] = useState(null)
+  const [session, setSession] = useState<Session | null>(null)
   const [isLoadingSession, setIsLoadingSession] = useState(true)
   const [showKBCreator, setShowKBCreator] = useState(false)
   const [showUploader, setShowUploader] = useState(false)
 
-  const token = session?.access_token
+  const token = session?.access_token ?? null
 
   const { kbs, selectedKB, setSelectedKB, isLoading: kbLoading, loadKBs, createKB, deleteKB } =
     useKnowledgeBase(token)
@@ -28,9 +30,7 @@ export default function App() {
       setSession(data.session)
       setIsLoadingSession(false)
     })
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       setSession(nextSession)
       setIsLoadingSession(false)
     })
@@ -41,7 +41,7 @@ export default function App() {
     if (token) loadKBs()
   }, [token, loadKBs])
 
-  function handleSelectKB(kb) {
+  function handleSelectKB(kb: KnowledgeBase) {
     setSelectedKB(kb)
     clearChat()
     setShowUploader(false)
@@ -80,7 +80,6 @@ export default function App() {
         <main className="flex-1 flex flex-col overflow-hidden">
           {selectedKB ? (
             <>
-              {/* KB toolbar */}
               <div className="flex items-center justify-between px-6 py-3 border-b border-border bg-surface shrink-0">
                 <div>
                   <h2 className="text-[0.9rem] font-semibold text-text m-0 leading-tight">
@@ -99,7 +98,7 @@ export default function App() {
                 </button>
               </div>
 
-              {showUploader && (
+              {showUploader && token && (
                 <DocumentUploader kbId={selectedKB.id} token={token} />
               )}
 
@@ -125,7 +124,12 @@ export default function App() {
   )
 }
 
-function WelcomeState({ kbCount, onNewKB }) {
+interface WelcomeStateProps {
+  kbCount: number
+  onNewKB: () => void
+}
+
+function WelcomeState({ kbCount, onNewKB }: WelcomeStateProps) {
   return (
     <div className="flex-1 flex flex-col items-center justify-center text-center px-8 gap-6">
       <div className="size-16 rounded-2xl bg-soft border border-border-strong flex items-center justify-center">

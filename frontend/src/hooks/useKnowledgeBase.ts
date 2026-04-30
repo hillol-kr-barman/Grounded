@@ -1,11 +1,12 @@
 import { useState, useCallback } from 'react'
 import { api } from '../lib/api'
+import type { KnowledgeBase } from '../types'
 
-export function useKnowledgeBase(token) {
-  const [kbs, setKbs] = useState([])
-  const [selectedKB, setSelectedKB] = useState(null)
+export function useKnowledgeBase(token: string | null) {
+  const [kbs, setKbs] = useState<KnowledgeBase[]>([])
+  const [selectedKB, setSelectedKB] = useState<KnowledgeBase | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
 
   const loadKBs = useCallback(async () => {
     if (!token) return
@@ -14,14 +15,15 @@ export function useKnowledgeBase(token) {
     try {
       setKbs(await api.listKBs(token))
     } catch (e) {
-      setError(e.message)
+      setError(e instanceof Error ? e.message : 'Failed to load knowledge bases.')
     } finally {
       setIsLoading(false)
     }
   }, [token])
 
   const createKB = useCallback(
-    async (name, description) => {
+    async (name: string, description: string | null): Promise<KnowledgeBase> => {
+      if (!token) throw new Error('Not authenticated.')
       const kb = await api.createKB(token, { name, description })
       setKbs((prev) => [kb, ...prev])
       setSelectedKB(kb)
@@ -31,7 +33,8 @@ export function useKnowledgeBase(token) {
   )
 
   const deleteKB = useCallback(
-    async (id) => {
+    async (id: string): Promise<void> => {
+      if (!token) throw new Error('Not authenticated.')
       await api.deleteKB(token, id)
       setKbs((prev) => prev.filter((k) => k.id !== id))
       if (selectedKB?.id === id) setSelectedKB(null)

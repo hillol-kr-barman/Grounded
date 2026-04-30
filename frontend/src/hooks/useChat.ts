@@ -1,13 +1,21 @@
 import { useState, useCallback } from 'react'
 import { api } from '../lib/api'
+import type { Message, Source } from '../types'
 
-export function useChat(token) {
-  const [messages, setMessages] = useState([])
+interface ChatStreamChunk {
+  token?: string
+  done?: boolean
+  sources?: Source[]
+}
+
+export function useChat(token: string | null) {
+  const [messages, setMessages] = useState<Message[]>([])
   const [isStreaming, setIsStreaming] = useState(false)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
 
   const sendMessage = useCallback(
-    async (userText, kbId) => {
+    async (userText: string, kbId: string): Promise<void> => {
+      if (!token) return
       setMessages((prev) => [...prev, { role: 'user', content: userText }])
       setIsStreaming(true)
       setError(null)
@@ -28,7 +36,8 @@ export function useChat(token) {
 
         if (!res.ok) throw new Error(await res.text())
 
-        const reader = res.body.getReader()
+        const reader = res.body?.getReader()
+        if (!reader) throw new Error('No response body.')
         const decoder = new TextDecoder()
         let buffer = ''
 
@@ -38,11 +47,11 @@ export function useChat(token) {
 
           buffer += decoder.decode(value, { stream: true })
           const lines = buffer.split('\n')
-          buffer = lines.pop()
+          buffer = lines.pop() ?? ''
 
           for (const line of lines) {
             if (!line.startsWith('data: ')) continue
-            const data = JSON.parse(line.slice(6))
+            const data = JSON.parse(line.slice(6)) as ChatStreamChunk
             if (data.token) {
               setMessages((prev) =>
                 prev.map((m) =>
@@ -53,7 +62,7 @@ export function useChat(token) {
               setMessages((prev) =>
                 prev.map((m) =>
                   m.id === assistantId
-                    ? { ...m, sources: data.sources || [], streaming: false }
+                    ? { ...m, sources: data.sources ?? [], streaming: false }
                     : m,
                 ),
               )
@@ -61,7 +70,7 @@ export function useChat(token) {
           }
         }
       } catch (e) {
-        setError(e.message)
+        setError(e instanceof Error ? e.message : 'Something went wrong.')
         setMessages((prev) =>
           prev.map((m) =>
             m.id === assistantId

@@ -1,9 +1,19 @@
 import { useState } from 'react'
+import type { KnowledgeBase } from '../types'
 
-export default function Sidebar({ kbs, selectedKB, isLoading, onSelectKB, onNewKB, onDeleteKB }) {
-  const [deletingId, setDeletingId] = useState(null)
+interface SidebarProps {
+  kbs: KnowledgeBase[]
+  selectedKB: KnowledgeBase | null
+  isLoading: boolean
+  onSelectKB: (kb: KnowledgeBase) => void
+  onNewKB: () => void
+  onDeleteKB: (id: string) => Promise<void>
+}
 
-  async function handleDelete(e, kb) {
+export default function Sidebar({ kbs, selectedKB, isLoading, onSelectKB, onNewKB, onDeleteKB }: SidebarProps) {
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  async function handleDelete(e: React.MouseEvent, kb: KnowledgeBase) {
     e.stopPropagation()
     if (!window.confirm(`Delete "${kb.name}"? This cannot be undone.`)) return
     setDeletingId(kb.id)
@@ -16,14 +26,12 @@ export default function Sidebar({ kbs, selectedKB, isLoading, onSelectKB, onNewK
 
   return (
     <aside className="w-64 shrink-0 border-r border-border bg-surface flex flex-col overflow-hidden">
-      {/* New KB button */}
       <div className="p-3 border-b border-border">
         <button type="button" className="btn w-full text-[0.8rem]" onClick={onNewKB}>
           + New knowledge base
         </button>
       </div>
 
-      {/* KB list */}
       <div className="flex-1 overflow-y-auto p-2 grid gap-0.5 content-start">
         {isLoading && (
           <p className="text-[0.78rem] text-muted text-center py-6 m-0">Loading…</p>
@@ -49,9 +57,7 @@ export default function Sidebar({ kbs, selectedKB, isLoading, onSelectKB, onNewK
               }`}
             >
               <div className="min-w-0 flex-1">
-                <p
-                  className={`text-[0.82rem] font-medium m-0 truncate ${isSelected ? 'text-text' : ''}`}
-                >
+                <p className={`text-[0.82rem] font-medium m-0 truncate ${isSelected ? 'text-text' : ''}`}>
                   {kb.name}
                 </p>
                 {kb.description && (
@@ -74,7 +80,6 @@ export default function Sidebar({ kbs, selectedKB, isLoading, onSelectKB, onNewK
         })}
       </div>
 
-      {/* Count */}
       <div className="p-3 border-t border-border">
         <p className="font-mono text-[0.62rem] text-[#6b7685] m-0 text-center">
           {kbs.length} knowledge base{kbs.length !== 1 ? 's' : ''}

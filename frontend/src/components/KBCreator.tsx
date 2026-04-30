@@ -1,12 +1,17 @@
 import { useState } from 'react'
 
-export default function KBCreator({ onCreate, onClose }) {
+interface KBCreatorProps {
+  onCreate: (name: string, description: string | null) => Promise<unknown>
+  onClose: () => void
+}
+
+export default function KBCreator({ onCreate, onClose }: KBCreatorProps) {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!name.trim()) return
     setIsLoading(true)
@@ -14,8 +19,8 @@ export default function KBCreator({ onCreate, onClose }) {
     try {
       await onCreate(name.trim(), description.trim() || null)
       onClose()
-    } catch (e) {
-      setError(e.message)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create knowledge base.')
       setIsLoading(false)
     }
   }

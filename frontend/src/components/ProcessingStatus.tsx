@@ -1,10 +1,12 @@
-const CONFIG = {
+type Status = 'processing' | 'ready' | 'failed'
+
+const CONFIG: Record<Status, { color: string; label: string; pulse: boolean }> = {
   processing: { color: 'bg-accent', label: 'Processing', pulse: true },
   ready: { color: 'bg-success', label: 'Ready', pulse: false },
   failed: { color: 'bg-danger', label: 'Failed', pulse: false },
 }
 
-export default function ProcessingStatus({ status }) {
+export default function ProcessingStatus({ status }: { status: Status }) {
   const cfg = CONFIG[status] ?? CONFIG.processing
   return (
     <span className="flex items-center gap-1.5">

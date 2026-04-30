@@ -1,13 +1,18 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
+import type { Session } from '@supabase/supabase-js'
 
-export default function AuthPage({ onAuth }) {
-  const [mode, setMode] = useState('signin')
+interface AuthPageProps {
+  onAuth: (session: Session) => void
+}
+
+export default function AuthPage({ onAuth }: AuthPageProps) {
+  const [mode, setMode] = useState<'signin' | 'signup'>('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [info, setInfo] = useState(null)
+  const [error, setError] = useState<string | null>(null)
+  const [info, setInfo] = useState<string | null>(null)
 
   function switchMode() {
     setMode((m) => (m === 'signin' ? 'signup' : 'signin'))
@@ -15,20 +20,20 @@ export default function AuthPage({ onAuth }) {
     setInfo(null)
   }
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setIsLoading(true)
     setError(null)
     setInfo(null)
 
     if (mode === 'signup') {
-      const { error } = await supabase.auth.signUp({ email, password })
-      if (error) setError(error.message)
+      const { error: signUpError } = await supabase.auth.signUp({ email, password })
+      if (signUpError) setError(signUpError.message)
       else setInfo('Check your email to confirm your account, then sign in.')
     } else {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) setError(error.message)
-      else onAuth(data.session)
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+      if (signInError) setError(signInError.message)
+      else if (data.session) onAuth(data.session)
     }
 
     setIsLoading(false)
@@ -37,7 +42,6 @@ export default function AuthPage({ onAuth }) {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        {/* Logo */}
         <div className="flex items-center gap-2.5 mb-8 justify-center">
           <div className="size-9 rounded-[8px] bg-accent flex items-center justify-center flex-shrink-0">
             <svg

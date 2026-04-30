@@ -1,15 +1,23 @@
 import { useEffect, useRef, useState } from 'react'
 import MessageBubble from './MessageBubble'
+import type { Message } from '../types'
 
-export default function ChatWindow({ messages, isStreaming, error, onSend }) {
+interface ChatWindowProps {
+  messages: Message[]
+  isStreaming: boolean
+  error: string | null
+  onSend: (text: string) => void
+}
+
+export default function ChatWindow({ messages, isStreaming, error, onSend }: ChatWindowProps) {
   const [input, setInput] = useState('')
-  const bottomRef = useRef(null)
+  const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  function handleSubmit(e) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const text = input.trim()
     if (!text || isStreaming) return
@@ -17,7 +25,7 @@ export default function ChatWindow({ messages, isStreaming, error, onSend }) {
     onSend(text)
   }
 
-  function handleKeyDown(e) {
+  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       handleSubmit(e)
@@ -26,7 +34,6 @@ export default function ChatWindow({ messages, isStreaming, error, onSend }) {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Message list */}
       <div className="flex-1 overflow-y-auto px-6 py-5 grid gap-5 content-start">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center gap-4 py-16">
@@ -64,7 +71,6 @@ export default function ChatWindow({ messages, isStreaming, error, onSend }) {
         <div ref={bottomRef} />
       </div>
 
-      {/* Input bar */}
       <div className="px-6 py-4 border-t border-border bg-surface shrink-0">
         <form onSubmit={handleSubmit} className="flex gap-2 items-end">
           <textarea
@@ -84,18 +90,9 @@ export default function ChatWindow({ messages, isStreaming, error, onSend }) {
           >
             {isStreaming ? (
               <span className="flex items-center gap-1">
-                <span
-                  className="size-1.5 rounded-full bg-[#0a0c0d] animate-bounce"
-                  style={{ animationDelay: '0ms' }}
-                />
-                <span
-                  className="size-1.5 rounded-full bg-[#0a0c0d] animate-bounce"
-                  style={{ animationDelay: '150ms' }}
-                />
-                <span
-                  className="size-1.5 rounded-full bg-[#0a0c0d] animate-bounce"
-                  style={{ animationDelay: '300ms' }}
-                />
+                <span className="size-1.5 rounded-full bg-[#0a0c0d] animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="size-1.5 rounded-full bg-[#0a0c0d] animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="size-1.5 rounded-full bg-[#0a0c0d] animate-bounce" style={{ animationDelay: '300ms' }} />
               </span>
             ) : (
               'Send'

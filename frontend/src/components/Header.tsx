@@ -1,7 +1,13 @@
-export default function Header({ session, onSignOut }) {
+import type { Session } from '@supabase/supabase-js'
+
+interface HeaderProps {
+  session: Session
+  onSignOut: () => void
+}
+
+export default function Header({ session, onSignOut }: HeaderProps) {
   return (
     <header className="sticky top-0 z-[100] flex items-center justify-between h-14 px-6 border-b border-border bg-[rgba(13,15,14,0.88)] backdrop-blur-[12px] shrink-0">
-      {/* Logo */}
       <div className="flex items-center gap-2.5">
         <div className="size-7 rounded-[6px] bg-accent flex items-center justify-center flex-shrink-0">
           <svg
@@ -25,22 +31,19 @@ export default function Header({ session, onSignOut }) {
         </span>
       </div>
 
-      {/* Auth chip */}
-      {session && (
-        <div className="flex items-center gap-2 bg-surface border border-border rounded-full px-3 py-1">
-          <span className="size-[7px] rounded-full bg-success flex-shrink-0" />
-          <span className="font-mono text-[0.72rem] text-muted max-w-[14rem] truncate">
-            {session.user.email}
-          </span>
-          <button
-            type="button"
-            onClick={onSignOut}
-            className="text-[0.72rem] text-[#6b7685] hover:text-accent transition-colors bg-transparent border-0 cursor-pointer p-0 ml-1 font-sans"
-          >
-            Sign out
-          </button>
-        </div>
-      )}
+      <div className="flex items-center gap-2 bg-surface border border-border rounded-full px-3 py-1">
+        <span className="size-[7px] rounded-full bg-success flex-shrink-0" />
+        <span className="font-mono text-[0.72rem] text-muted max-w-[14rem] truncate">
+          {session.user.email}
+        </span>
+        <button
+          type="button"
+          onClick={onSignOut}
+          className="text-[0.72rem] text-[#6b7685] hover:text-accent transition-colors bg-transparent border-0 cursor-pointer p-0 ml-1 font-sans"
+        >
+          Sign out
+        </button>
+      </div>
     </header>
   )
 }

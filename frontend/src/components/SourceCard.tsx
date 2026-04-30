@@ -1,3 +1,5 @@
+import type { Source } from '../types'
+
 function DocIcon() {
   return (
     <svg
@@ -39,19 +41,19 @@ function LinkIcon() {
   )
 }
 
-function CardInner({ source }) {
+function CardInner({ source }: { source: Source }) {
   const isURL = Boolean(source.url?.startsWith('http'))
   return (
     <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-surface border border-border rounded-[5px] hover:border-accent transition-colors">
       {isURL ? <LinkIcon /> : <DocIcon />}
       <span className="font-mono text-[0.68rem] text-muted truncate max-w-[180px]">
-        {source.name || 'Source'}
+        {source.name ?? 'Source'}
       </span>
     </div>
   )
 }
 
-export default function SourceCard({ source }) {
+export default function SourceCard({ source }: { source: Source }) {
   if (source.url?.startsWith('http')) {
     return (
       <a
