@@ -8,9 +8,9 @@ from dependencies import get_current_user_id
 
 router = APIRouter(prefix="/knowledge-bases", tags=["documents"])
 
-_MAX_BYTES = int(os.getenv("MAX_UPLOAD_SIZE_MB", "20")) * 1024 * 1024
+_MAX_BYTES = int(os.getenv("MAX_UPLOAD_SIZE_MB", "200")) * 1024 * 1024
 
-_ALLOWED_EXTENSIONS = {".pdf", ".docx", ".txt", ".md", ".csv", ".xlsx"}
+_ALLOWED_EXTENSIONS = {".pdf", ".docx", ".txt", ".md", ".csv", ".xlsx", ".zip"}
 
 
 @router.post("/{kb_id}/upload")
